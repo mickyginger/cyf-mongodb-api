@@ -38,22 +38,75 @@ client.connect(function () {
       if (error) {
         return response.sendStatus(500).send(error)
       }
-      return response.send(result)
+      return response.status(200).send(result)
 
       client.close()
     })
   })
 
   app.post('/films', function (request, response) {
-    response.send('Create a film')
+    const collection = db.collection('movies')
+
+    const newMovie = request.body // more validations cab done here
+
+    collection.insertOne(newMovie, function (error, result) {
+      if (error) {
+        console.log(error)
+        return response.status(500).send(error)
+      }
+      return response.status(200).send(result.ops[0])
+    })
   })
 
   app.put('/films/:id', function (request, response) {
-    response.send('Update one film')
+    const collection = db.collection('movies')
+    const {id} = request.params
+
+    if (!mongodb.ObjectID.isValid(id)) {
+      return response.sendStatus(404)
+    }
+
+    const newId = new mongodb.ObjectID(id)
+    const searchObject = {
+      _id: newId,
+    }
+    delete request.body._id
+    const updateObject = {
+      $set: request.body,
+    }
+
+    collection.findOneAndUpdate(
+      searchObject,
+      updateObject,
+      options,
+      (error, result) => {
+        if (error) {
+          return response.send(error)
+        }
+
+        return response.send(result.value) //result.value===result.ops[0]
+      }
+    )
   })
 
   app.delete('/films/:id', function (request, response) {
-    response.send('Delete one film')
+    const collection = db.collection('movies')
+    const newId = new mongodb.ObjectID(request.params.id)
+    const searchObject = {_id: id}
+    if (!mongodb.ObjectID.isValid(newId)) {
+      return response.sendStatus(404)
+    }
+    collection.deleteOne(searchObject, function (error, result) {
+      if (!result) {
+        return response.status(404)
+      }
+      if (error) {
+        return response.sendStatus(500).send(error)
+      }
+      return response.status(200).send(result)
+
+      client.close()
+    })
   })
 
   app.listen(3000, () => {

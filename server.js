@@ -25,7 +25,23 @@ client.connect(function () {
   })
 
   app.get('/films/:id', function (request, response) {
-    response.send('Retrieve one film')
+    const collection = db.collection('movies')
+    const newId = new mongodb.ObjectID(request.params.id)
+    const searchObject = {_id: id}
+    if (!mongodb.ObjectID.isValid(newId)) {
+      return response.sendStatus(404)
+    }
+    collection.findOne(searchObject, function (error, result) {
+      if (!result) {
+        return response.status(404)
+      }
+      if (error) {
+        return response.sendStatus(500).send(error)
+      }
+      return response.send(result)
+
+      client.close()
+    })
   })
 
   app.post('/films', function (request, response) {

@@ -14,7 +14,7 @@ client.connect(function () {
 
   app.get('/films', function (request, response) {
     const collection = db.collection('movies')
-    collection.find().toArray((error, movies) => {
+    collection.find().limit(15).toArray((error, movies) => {
       if (error) {
         console.log(error)
         response.status(500).send(error)
@@ -27,7 +27,7 @@ client.connect(function () {
   app.get('/films/:id', function (request, response) {
     const collection = db.collection('movies')
     const newId = new mongodb.ObjectID(request.params.id)
-    const searchObject = {_id: id}
+    const searchObject = {_id: newId}
     if (!mongodb.ObjectID.isValid(newId)) {
       return response.sendStatus(404)
     }
@@ -54,14 +54,14 @@ client.connect(function () {
         console.log(error)
         return response.status(500).send(error)
       }
-      return response.status(200).send(result.ops[0])
+      return response.status(201).send(result.ops[0])
     })
   })
 
   app.put('/films/:id', function (request, response) {
     const collection = db.collection('movies')
     const {id} = request.params
-
+  const options ={};
     if (!mongodb.ObjectID.isValid(id)) {
       return response.sendStatus(404)
     }
